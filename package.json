@@ -1,0 +1,26 @@
+{
+  "name": "docent",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "A CLI that reads a repo and produces a browser-based walk-through of it",
+  "bin": {
+    "docent": "./dist/cli.js"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "tsc",
+    "dev": "tsx src/cli.ts"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "repomix": "^1.13.1",
+    "smol-toml": "^1.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2",
+    "vitest": "^3.2.4"
+  }
+}

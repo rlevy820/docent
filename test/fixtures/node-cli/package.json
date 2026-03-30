@@ -1,0 +1,7 @@
+{
+  "name": "my-node-tool",
+  "version": "1.0.0",
+  "bin": {
+    "my-node-tool": "./dist/cli.js"
+  }
+}

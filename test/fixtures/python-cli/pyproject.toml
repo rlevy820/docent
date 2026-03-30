@@ -1,0 +1,6 @@
+[project]
+name = "my-python-tool"
+version = "0.1.0"
+
+[project.scripts]
+my-python-tool = "my_python_tool.cli:main"
