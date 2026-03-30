@@ -99,13 +99,48 @@ docent/
     Natural-Language-Processing.pdf   # Reference for output quality
     AVOID.md                          # Writing anti-patterns to avoid
   src/
-    reader.ts        # Repo ingestion and front door detection
-    inference.ts     # Four-question context inference
-    writer.ts        # Prose generation from structured context
-    server.ts        # Local server that opens the browser
-  cli.ts             # Entry point: `docent`
-  CLAUDE.md          # This file
+    reader.ts                         # Public API: readRepo(dir) -> ReadResult
+    reader/
+      types.ts                        # ReaderResult, ManifestFile interfaces
+      manifests.ts                    # Manifest detection + project name extraction
+      context.ts                      # README finder, file tree builder
+      pack.ts                         # Repomix integration for packing source
+    inference.ts                      # Public API: infer(readerResult) -> InferenceResult
+    inference/
+      types.ts                        # InferenceResult, FrontDoor interfaces
+      prompt.ts                       # Builds system + user prompt from reader output
+      client.ts                       # Anthropic API client wrapper
+    writer.ts                         # (not built yet) Prose generation from structured context
+    server.ts                         # (not built yet) Local server that opens the browser
+    cli.ts                            # (not built yet) Entry point: `docent`
+  test/
+    reader/                           # Unit tests for reader module
+    inference/                        # Unit tests for inference module
+    fixtures/                         # Minimal fake repos for testing
+    manual-check.ts                   # Run reader on any repo with progress logs
+    manual-inference.ts               # Run reader + inference on any repo (calls API)
+  CLAUDE.md                           # This file
 ```
+
+---
+
+## Current Status
+
+### Done
+- **Reader module**: Takes any directory, returns manifests, README, file tree, and Repomix-packed source. Language-agnostic. Filters binary files from tree. 23 tests.
+- **Inference module**: Sends reader output to Claude Sonnet, returns structured answers to the four questions. Handles token budget truncation for large repos. 8 tests.
+
+### Next
+- **Writer module**: Takes InferenceResult, produces Part 1 as HTML. This is where the NLP doc quality bar and AVOID.md rules get enforced.
+- **Server module**: Serve the HTML and open the browser.
+- **CLI**: Wire everything together as `docent` command.
+
+### Dependencies
+- `repomix` — repo packing (file tree, .gitignore, source collection)
+- `smol-toml` — TOML manifest parsing
+- `@anthropic-ai/sdk` — Claude API calls
+- `dotenv` — .env file loading
+- `vitest` / `tsx` / `typescript` — dev tooling
 
 ---
 
