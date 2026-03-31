@@ -1,7 +1,7 @@
 import { resolve, basename } from "path";
-import { detectManifests, extractProjectName } from "../src/reader/manifests.js";
-import { findReadme, buildFileTree } from "../src/reader/context.js";
-import { packRepo } from "../src/reader/pack.js";
+import { detectManifests, extractProjectName } from "../src/backend/reader/manifests.js";
+import { findReadme, buildFileTree } from "../src/backend/reader/context.js";
+import { packRepo } from "../src/backend/reader/pack.js";
 
 const dir = resolve(process.argv[2] || ".");
 console.log(`\n[docent] reading ${dir}\n`);

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { join } from "path";
-import { findReadme, buildFileTree } from "../../src/reader/context.js";
+import { findReadme, buildFileTree } from "../../src/backend/reader/context.js";
 
 const fixtures = join(import.meta.dirname, "../fixtures");
 

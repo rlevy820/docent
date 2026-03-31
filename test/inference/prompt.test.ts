@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { buildPrompt } from "../../src/inference/prompt.js";
-import type { ReaderResult } from "../../src/reader/types.js";
+import { buildPrompt, generateSpace } from "../../src/backend/space.js";
+import type { Space } from "../../src/backend/space.js";
+import type { ReaderResult } from "../../src/backend/reader/types.js";
 
 const fakeReader: ReaderResult = {
   repoRoot: "/tmp/fake-repo",
@@ -13,67 +14,81 @@ const fakeReader: ReaderResult = {
   packedContent: "<files>...packed source code...</files>",
 };
 
-describe("buildPrompt", () => {
-  it("returns a system message and a user message", () => {
-    const { system, user } = buildPrompt(fakeReader);
+describe("buildPrompt — root space", () => {
+  const { system, user } = buildPrompt(fakeReader, []);
+
+  it("returns system and user messages", () => {
     expect(typeof system).toBe("string");
     expect(typeof user).toBe("string");
     expect(system.length).toBeGreaterThan(0);
     expect(user.length).toBeGreaterThan(0);
   });
 
-  it("includes the packed content in the user message", () => {
-    const { user } = buildPrompt(fakeReader);
-    expect(user).toContain("packed source code");
+  it("indicates this is the first thing the reader sees", () => {
+    expect(system).toContain("reader has not been told anything yet");
   });
 
-  it("includes the README in the user message", () => {
-    const { user } = buildPrompt(fakeReader);
-    expect(user).toContain("A tool that does fake things");
-  });
-
-  it("includes the file tree in the user message", () => {
-    const { user } = buildPrompt(fakeReader);
-    expect(user).toContain("src/index.ts");
-  });
-
-  it("includes manifest content in the user message", () => {
-    const { user } = buildPrompt(fakeReader);
-    expect(user).toContain("fake-tool");
-  });
-
-  it("asks all eight questions", () => {
-    const { system } = buildPrompt(fakeReader);
-    expect(system).toContain("where is the reader right now");
-    expect(system).toContain("what is this building and why was it built");
-    expect(system).toContain("What kind of building is it");
-    expect(system).toContain("what's visible from outside");
-    expect(system).toContain("What doors exist");
-    expect(system).toContain("visitor's door");
-    expect(system).toContain("rooms and why does each one exist");
-    expect(system).toContain("Term pairs");
-  });
-
-  it("enforces the term rule", () => {
-    const { system } = buildPrompt(fakeReader);
-    expect(system).toContain("plain-language description");
-    expect(system).toContain("technical term");
+  it("instructs root space to place the building", () => {
+    expect(system).toContain("root space");
+    expect(system).toContain("what world");
   });
 
   it("contains the NLP quality bar passage", () => {
-    const { system } = buildPrompt(fakeReader);
     expect(system).toContain("Great work this week");
     expect(system).toContain("We need to talk about your performance");
   });
 
-  it("instructs JSON output", () => {
-    const { system } = buildPrompt(fakeReader);
+  it("enforces strict language rules", () => {
+    expect(system).toContain("No technical terms unless you explained them first");
+    expect(system).toContain("No invented metaphors");
+    expect(system).toContain("No \"imagine.\"");
+  });
+
+  it("instructs JSON output with content and doors", () => {
     expect(system).toContain("JSON");
+    expect(system).toContain('"content"');
+    expect(system).toContain('"doors"');
+    expect(system).toContain('"label"');
+  });
+
+  it("includes repo content in the user message", () => {
+    expect(user).toContain("packed source code");
+    expect(user).toContain("A tool that does fake things");
+    expect(user).toContain("src/index.ts");
+    expect(user).toContain("fake-tool");
   });
 
   it("handles missing README gracefully", () => {
     const noReadme = { ...fakeReader, readme: null };
-    const { user } = buildPrompt(noReadme);
+    const { user } = buildPrompt(noReadme, []);
     expect(user).not.toContain("undefined");
+  });
+});
+
+describe("buildPrompt — deeper space", () => {
+  const prevSpaces: Space[] = [
+    {
+      content: "Glasses with a camera and microphone. This project uses them to remember people.",
+      doors: [{ label: "How do the glasses send what they see?" }],
+    },
+  ];
+
+  const { system } = buildPrompt(fakeReader, prevSpaces);
+
+  it("includes the previous spaces in the system prompt", () => {
+    expect(system).toContain("Glasses with a camera and microphone");
+    expect(system).toContain("remember people");
+  });
+
+  it("states the reader knows only what has been shown", () => {
+    expect(system).toContain("entirety of what they know");
+  });
+
+  it("does not include root space instructions", () => {
+    expect(system).not.toContain("root space");
+  });
+
+  it("instructs incremental building", () => {
+    expect(system).toContain("one new idea");
   });
 });

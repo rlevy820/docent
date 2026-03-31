@@ -132,26 +132,28 @@ docent/
     Natural-Language-Processing.pdf   # Reference for output quality
     AVOID.md                          # Writing anti-patterns to avoid
   src/
-    reader.ts                         # Public API: readRepo(dir) -> ReadResult
-    reader/
-      types.ts                        # ReaderResult, ManifestFile interfaces
-      manifests.ts                    # Manifest detection + project name extraction
-      context.ts                      # README finder, file tree builder
-      pack.ts                         # Repomix integration for packing source
-    inference.ts                      # Public API: infer(readerResult) -> InferenceResult
-    inference/
-      types.ts                        # InferenceResult and supporting interfaces
-      prompt.ts                       # Builds system + user prompt from reader output
-      client.ts                       # Anthropic API client wrapper
-    writer.ts                         # (not built yet) Prose generation from structured context
-    server.ts                         # (not built yet) Local server that opens the browser
+    backend/
+      reader.ts                       # Public API: readRepo(dir) -> ReadResult
+      reader/
+        types.ts                      # ReaderResult, ManifestFile interfaces
+        manifests.ts                  # Manifest detection + project name extraction
+        context.ts                    # README finder, file tree builder
+        pack.ts                       # Repomix integration for packing source
+      space.ts                        # Space/Door types, prompt building, generateSpace()
+      client.ts                       # Anthropic API client wrapper (callClaude)
+      server.ts                       # HTTP server: JSON API (/api/root, /api/door) + static file serving
+    frontend/
+      index.html                      # Page shell — loads style.css and app.js
+      style.css                       # All styling (Century Schoolbook, doors, loading states)
+      app.js                          # Client-side rendering: fetches spaces from API, renders doors
     cli.ts                            # (not built yet) Entry point: `docent`
   test/
     reader/                           # Unit tests for reader module
-    inference/                        # Unit tests for inference module
+    inference/                        # Unit tests for space/prompt module
+    writer/                           # Tests for frontend static files
     fixtures/                         # Minimal fake repos for testing
     manual-check.ts                   # Run reader on any repo with progress logs
-    manual-inference.ts               # Run reader + inference on any repo (calls API)
+    manual-writer.ts                  # Run reader + server on any repo (calls API)
   CLAUDE.md                           # This file
 ```
 
@@ -160,14 +162,12 @@ docent/
 ## Current Status
 
 ### Done
-- **Reader module**: Takes any directory, returns manifests, README, file tree, and Repomix-packed source. Language-agnostic. Filters binary files from tree. 23 tests.
-
-### Needs Rework
-- **Inference module**: Currently answers four questions (whatItDoes, whoAndWhen, frontDoor, scenario). Needs to be expanded to answer the seven questions above — the building exterior, the doors, the rooms, and the term pairs.
+- **Reader module** (`src/backend/reader.ts`): Takes any directory, returns manifests, README, file tree, and Repomix-packed source. Language-agnostic. Filters binary files from tree. 23 tests.
+- **Space generation** (`src/backend/space.ts`): Builds prompts from reader output + walk-through path, calls Claude, returns a Space (content + doors). Recursive — each door click generates a new space.
+- **Backend server** (`src/backend/server.ts`): HTTP server with JSON API (`/api/root`, `/api/door`) and static file serving for the frontend.
+- **Frontend** (`src/frontend/`): Static HTML/CSS/JS app. Fetches spaces from the API, renders them, handles door clicks client-side.
 
 ### Not Built Yet
-- **Writer module**: Takes inference output, produces the walk-through as HTML.
-- **Server module**: Serve the HTML and open the browser.
 - **CLI**: Wire everything together as `docent` command.
 
 ### Dependencies

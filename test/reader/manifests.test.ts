@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { join } from "path";
-import { detectManifests, extractProjectName } from "../../src/reader/manifests.js";
+import { detectManifests, extractProjectName } from "../../src/backend/reader/manifests.js";
 
 const fixtures = join(import.meta.dirname, "../fixtures");
 

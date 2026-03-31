@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { join } from "path";
-import { packRepo } from "../../src/reader/pack.js";
+import { packRepo } from "../../src/backend/reader/pack.js";
 
 const fixtures = join(import.meta.dirname, "../fixtures");
 
