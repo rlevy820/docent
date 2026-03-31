@@ -1,8 +1,8 @@
 # docent
 
-A CLI tool that reads any repository and produces a browser-based walk-through of it, written for someone who has never seen the code and doesn't know what it does.
+A tool that reads any code repository and produces a browser-based walk-through of it, written for someone who has never seen the code and doesn't know what it does.
 
-You `cd` into a cloned repo and run `docent`. A browser opens. What you read should feel like someone knowledgeable sat down next to you and explained the project from scratch — not a README, not a reference doc, but a linear explanation that starts from a moment you've lived and ends with you understanding what the project does and why.
+You point it at a project. A browser opens. What you read should feel like someone knowledgeable walked you through the building — not handed you a blueprint, not pointed at a directory, but stood with you outside, showed you what it is, and then walked you through the doors that matter to you.
 
 The reference for what this output should feel like is in `resources/Natural-Language-Processing.pdf`. Read the first two pages before touching any code.
 
@@ -10,51 +10,82 @@ The reference for what this output should feel like is in `resources/Natural-Lan
 
 ## The Core Problem
 
-When you clone an unfamiliar repo, you usually have nothing. Maybe a sparse README. Maybe nothing at all. You look at the file tree and it means little. You open a file and you're mid-conversation with no context.
+When you encounter an unfamiliar codebase, you usually have nothing. Maybe a sparse README. Maybe nothing at all. You look at the file tree and it means little. You open a file and you're mid-conversation with no context.
 
-The solution is not better documentation. The solution is a different kind of explanation — one that starts with the problem the project solves, not with how the project works.
+The solution is not better documentation. The solution is a different kind of explanation — one that treats a codebase the way you'd treat a building you've never been inside.
+
+---
+
+## The Building
+
+Everyone understands buildings. You can look at one from across the street and know roughly what it is — a house, a warehouse, a hospital. You can walk around it and see the sides, the doors, the loading dock. You can pick a door based on who you are — visitor, employee, maintenance — and each door leads you through the same building differently.
+
+Code projects work the same way. They have an exterior (what it is and why it exists), sides you can see from outside (the commands, the inputs, the outputs), doors for different people (the person using it, the person building on it, the person maintaining it), and rooms inside (the parts and how they connect).
+
+Docent's job is to walk someone through the building. Not hand them a floor plan. Walk them through it.
 
 ---
 
 ## The Output
 
-The output is a single HTML page that opens in the browser. It reads like an essay, not a reference doc. No sidebars, no navigation trees, no API tables.
+The output is a single HTML page that opens in the browser. It reads like a walk-through, not a reference doc. No sidebars, no navigation trees, no API tables.
 
-It has two parts:
+It follows a zoom sequence — the same way you'd approach a building you've never seen:
 
-**Part 1: The Front Door**
-This is the opening. It follows a strict structure:
+**1. The Exterior**
+What is this building. Why does it exist. What kind of building is it — described in terms the reader already knows, not technical labels. A project that you type a command into and it does something for you is different from a project that other projects use as a building block, which is different from a project that runs constantly and waits for requests. The reader should understand which kind this is without needing a vocabulary lesson.
 
-1. A concrete scenario — a specific moment a real person would have lived — that makes the reader feel the problem the project solves before any explanation begins.
-2. One sentence that names what the project does, written so a non-programmer can understand it.
-3. A short walk-through of the primary use case: what you type, what happens, what you get back.
+**2. The Sides and Doors**
+What's visible from outside. What ways in exist. Each door is described by what you'd be doing when you'd use it — "if you want to use this tool, you go here; if you want to understand how it's built, you go here; if you want to change how it works, you go here." Not every project has every door. Some buildings only have one entrance. The reader should see what doors exist and know which one is theirs.
 
-Part 1 should be completable in under two minutes of reading. When someone finishes it, they should be able to answer: "What does this project do, and when would I use it?"
+**3. The Visitor's Entrance**
+The default path. What happens when you walk in as someone who just wants to use this thing. What you see first. What it does for you. This is the equivalent of the old "Part 1" — the front door walk-through — but now it exists inside the larger building, not as a standalone piece.
 
-**Part 2: The Other Doors** *(later development — do not build yet)*
-After the front door, the reader can choose where to go next. Each additional concept or subsystem is its own door. The order is determined by importance to understanding the project, not by file structure or alphabetical order.
+**4. The Map**
+The rooms and why they exist. Not every room — the ones that matter for understanding the building. Each room arrives as the answer to a question the previous room raised. The reader should finish and feel like the architecture is obvious — "of course it works that way" — because each piece was the inevitable solution to a problem they already understood.
+
+The reader can put on whichever hat fits. Some will only need the visitor's entrance. Some will want to understand the rooms. The structure accommodates both without forcing either.
 
 ---
 
-## The Generation Task (MVP)
+## The Term Rule
 
-The system reads a repo and produces Part 1.
+The reader does not know what a CLI, an API, a library, a framework, a module, a function, a server, or a test suite is. Every technical concept must be described in plain language before it is named.
 
-To do this, it needs to answer four questions in order:
+The NLP doc does this with "vector": it doesn't say "a vector is like a list." It says "we assign it to a list of numbers, called a vector" and immediately shows why that matters. The term arrives after the reader already understands the concept.
 
-**1. What does this project do?**
-Read the repo: entry point files, primary functions, CLI argument definitions, any existing README. Form a one-sentence answer in plain English.
+Docent must do the same for every piece of technical vocabulary. "A window on your computer you type commands into" comes before "command-line tool." "A collection of pieces of code other people use to build build new code on top of" comes before "library."
 
-**2. Who would use it, and when?**
-Infer from the code's inputs and outputs. What kind of person would have this problem? What were they doing before they reached for this tool?
+The description is the definition. The term is just a shorter name for something the reader already holds.
 
-**3. What is the front door?**
-Find the primary entry point — the one command, the one function, the one thing the author expected most users to do first. For a CLI tool, this is usually the main command with its most common arguments. For a library, it's the function imported first in example usage. For a web app, it's the primary user-facing action.
+---
 
-**4. What scenario puts the reader inside the problem?**
-Write a two-to-four sentence scene. A specific person. A specific moment. A specific frustration or goal. No jargon. No explanation yet. The reader should recognize themselves in it before they know what the project is.
+## The Generation Task
 
-The output of answering these four questions is Part 1.
+The system reads a repo and produces the walk-through.
+
+To do this, the inference layer must answer these questions:
+
+**1. What is this building and why was it built?**
+What problem in the world may have caused someone to build this. One sentence, plain English, no jargon. A person who has never written code should be able to read it and know whether this project is relevant to their life.
+
+**2. What kind of building is it?**
+Not a label (CLI, library, service) but a plain-language description of how this kind of thing works. What does the person do with it? Do they type something and get a result? Do they plug it into something else they're building? Does it run on its own and wait? The description should make the kind obvious before any term is introduced.
+
+**3. What are the sides — what's visible from outside?**
+The surfaces someone can see before entering. For a command-based tool: the commands and what they accept. For a collection of building blocks: what pieces are available. For a running service: what it responds to. Described in terms of what a person would yeahsee and do, not technical interface descriptions.
+
+**4. What doors exist and who are they for?**
+Every way into the project, described by the relationship the person has to it. "If you want to use this, you start here." "If you want to understand how it's built, you start here." "If you want to change it, you start here." Not every project has all three. Some have one door.
+
+**5. What happens when you walk through the visitor's door?**
+The primary use case, step by step. What you do, what happens, what you get back. Written so someone who has never used a tool like this can follow it.
+
+**6. What are the rooms and why does each one exist?**
+The major parts of the project and how they relate. Each room should be described by the problem it solves, not by its technical name. The order matters: each room should answer a question that the previous room raised. The sequence should make the architecture feel inevitable.
+
+**7. For every concept: what's the plain description and what's the technical term?**
+Every technical term surfaced in answers 1-6 must have a paired plain-language description. The writer uses the description first, introduces the term after.
 
 ---
 
@@ -62,32 +93,34 @@ The output of answering these four questions is Part 1.
 
 Every line of generated explanation is held to one test: could a person who knows nothing about programming read this sentence and continue to the next one without stopping?
 
-If a technical term is unavoidable, it must be defined the sentence it appears, using the thing itself as the definition — not an analogy, not a reference to something else.
+Patterns to avoid are documented in `resources/AVOID.md`. Read it before writing any prose generation code. The most common failure modes in generated explanation are listed there by name.
 
-The NLP doc does this with "vector": it doesn't say "a vector is like a list." It says "we assign it to a list of numbers, called a vector" and immediately shows why that matters. The term arrives after the reader already understands the concept.
+---
 
-Patterns to avoid are documented in `resources/AVOID.md`. Read it. The most common failure modes in generated explanation are listed there by name.
+## The "Of Course" Test
+
+When a reader finishes the walk-through, each piece of the project's architecture should feel like it was the obvious solution to a problem they already understood. If a component feels introduced rather than arrived at — if the reader's reaction is "okay, I guess that exists" instead of "of course, you'd need that" — the sequencing has failed.
+
+This is the writer's real job: not formatting structured data into paragraphs, but finding the sequence where each piece arrives as an answer to a question the reader is already holding.
 
 ---
 
 ## What the MVP Is Not
 
-- It is not a full codebase explainer. It covers the front door only.
 - It is not interactive. The reader scrolls; they do not click through steps or answer questions.
 - It does not require any input from the repo's author. It works on a cold clone.
-- It does not try to explain every file or function. Depth comes later, through the other doors.
+- It does not try to explain every file or function. It explains the building well enough that the reader could look at the file tree afterward and have a rough sense of why each piece exists.
 
 ---
 
 ## Development Sequence
 
-1. Build the repo reader: given a directory, identify the front door (entry point, primary command, main function).
-2. Build the context inference: given the front door, answer the four questions above and produce structured output (not prose yet).
-3. Build the writer: given the structured output, produce Part 1 as an HTML page.
-4. Test on three real CLI repos of increasing complexity. Evaluate whether Part 1 passes the writing standard above.
-5. Iterate on the writer prompt until the output reads like the NLP doc's opening, not like a README.
-
-Do not move to Part 2 until Part 1 is passing consistently.
+1. ~~Build the repo reader: given a directory, collect manifests, README, file tree, and packed source.~~ Done.
+2. Build the inference layer: given the reader output, answer the seven questions above and produce structured output (not prose yet).
+3. Build the writer: given the structured output, produce the walk-through as an HTML page.
+4. Build the server: serve the HTML and open the browser.
+5. Wire everything together as the `docent` command.
+6. Test on real repos of increasing complexity. Evaluate whether the output passes the writing standard and the "of course" test.
 
 ---
 
@@ -107,7 +140,7 @@ docent/
       pack.ts                         # Repomix integration for packing source
     inference.ts                      # Public API: infer(readerResult) -> InferenceResult
     inference/
-      types.ts                        # InferenceResult, FrontDoor interfaces
+      types.ts                        # InferenceResult and supporting interfaces
       prompt.ts                       # Builds system + user prompt from reader output
       client.ts                       # Anthropic API client wrapper
     writer.ts                         # (not built yet) Prose generation from structured context
@@ -128,10 +161,12 @@ docent/
 
 ### Done
 - **Reader module**: Takes any directory, returns manifests, README, file tree, and Repomix-packed source. Language-agnostic. Filters binary files from tree. 23 tests.
-- **Inference module**: Sends reader output to Claude Sonnet, returns structured answers to the four questions. Handles token budget truncation for large repos. 8 tests.
 
-### Next
-- **Writer module**: Takes InferenceResult, produces Part 1 as HTML. This is where the NLP doc quality bar and AVOID.md rules get enforced.
+### Needs Rework
+- **Inference module**: Currently answers four questions (whatItDoes, whoAndWhen, frontDoor, scenario). Needs to be expanded to answer the seven questions above — the building exterior, the doors, the rooms, and the term pairs.
+
+### Not Built Yet
+- **Writer module**: Takes inference output, produces the walk-through as HTML.
 - **Server module**: Serve the HTML and open the browser.
 - **CLI**: Wire everything together as `docent` command.
 
@@ -146,6 +181,6 @@ docent/
 
 ## The Test
 
-When you run `docent` on a repo you've never seen, the output should make you feel, by the end of Part 1, that you understand what the project is for — without having opened a single source file yourself.
+When you run `docent` on a repo you've never seen, the output should make you feel like you understand the building — what it is, why it exists, how to walk through it, and why the rooms are where they are.
 
-If you finish reading and you'd still have to open the code to answer "what does this do?", the output has failed.
+If you finish reading and the architecture doesn't feel inevitable — if the pieces feel listed rather than arrived at — the output has failed.

@@ -42,12 +42,28 @@ describe("buildPrompt", () => {
     expect(user).toContain("fake-tool");
   });
 
-  it("asks all four questions", () => {
+  it("asks all eight questions", () => {
     const { system } = buildPrompt(fakeReader);
-    expect(system).toContain("What does this project do");
-    expect(system).toContain("Who would use it");
-    expect(system).toContain("front door");
-    expect(system).toContain("scenario");
+    expect(system).toContain("where is the reader right now");
+    expect(system).toContain("what is this building and why was it built");
+    expect(system).toContain("What kind of building is it");
+    expect(system).toContain("what's visible from outside");
+    expect(system).toContain("What doors exist");
+    expect(system).toContain("visitor's door");
+    expect(system).toContain("rooms and why does each one exist");
+    expect(system).toContain("Term pairs");
+  });
+
+  it("enforces the term rule", () => {
+    const { system } = buildPrompt(fakeReader);
+    expect(system).toContain("plain-language description");
+    expect(system).toContain("technical term");
+  });
+
+  it("contains the NLP quality bar passage", () => {
+    const { system } = buildPrompt(fakeReader);
+    expect(system).toContain("Great work this week");
+    expect(system).toContain("We need to talk about your performance");
   });
 
   it("instructs JSON output", () => {
