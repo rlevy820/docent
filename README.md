@@ -40,6 +40,8 @@ Under active development.
 
 ## Demo
 
+Running docent on itself.
+
 ![docent screenshot](demo/demo.png)
 
 https://github.com/user-attachments/assets/e8c66d55-23ed-4ed4-a308-af967b1f281f
