@@ -32,16 +32,40 @@ main {
   margin: 0 0 2em 0;
 }
 
-.section {
-  margin-bottom: 1.75em;
+.intro {
+  margin-bottom: 2em;
 }
 
-.section p {
+.intro-sentence {
   margin: 0 0 0.75em 0;
 }
 
-.section p:last-child {
-  margin-bottom: 0;
+/* Feature links — underlined, same color as text */
+.feature-link {
+  color: #1a1a1a;
+  text-decoration: none;
+  border-bottom: 1px solid #1a1a1a;
+  cursor: pointer;
+}
+
+.feature-link:hover {
+  border-bottom-width: 2px;
+}
+
+.feature-link.active {
+  border-bottom: 2px solid #1a1a1a;
+}
+
+/* Detail panel — indented, slightly muted */
+.feature-detail {
+  margin: 0.25em 0 1.25em 0;
+  padding: 1em 1.25em;
+  border-left: 2px solid #ddd;
+  color: #333;
+}
+
+.feature-detail p {
+  margin: 0;
 }
 
 .loading {
