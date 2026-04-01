@@ -10,7 +10,7 @@ Then, it writes a walkthrough section by section.
 
 ![docent screenshot](demo/demo.png)
 
-https://github.com/user-attachments/assets/demo.mp4
+https://github.com/user-attachments/assets/e8c66d55-23ed-4ed4-a308-af967b1f281f
 
 ## Running it
 
