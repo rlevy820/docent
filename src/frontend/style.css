@@ -14,41 +14,42 @@ main {
   padding: 0 1.5em;
 }
 
-.space {
-  margin-bottom: 1.5em;
+.project-name {
+  font-size: 1.1em;
+  font-weight: normal;
+  letter-spacing: 0.02em;
+  margin: 0 0 0.4em 0;
 }
 
-.space p {
+.project-what {
+  margin: 0 0 1.5em 0;
+  color: #555;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 0 0 2em 0;
+}
+
+.section {
+  margin-bottom: 1.75em;
+}
+
+.section p {
   margin: 0 0 0.75em 0;
 }
 
-.doors {
-  margin-top: 1em;
-}
-
-.door {
-  display: block;
-  margin-bottom: 0.5em;
-  color: #1a1a1a;
-  text-decoration: none;
-  border-bottom: 1px solid #999;
-  padding-bottom: 1px;
-  width: fit-content;
-  cursor: pointer;
-}
-
-.door:hover {
-  border-bottom-color: #1a1a1a;
-}
-
-.door.visited {
-  color: #888;
-  border-bottom-color: transparent;
-  pointer-events: none;
+.section p:last-child {
+  margin-bottom: 0;
 }
 
 .loading {
   color: #888;
   font-style: italic;
-  margin: 1em 0;
+}
+
+.error {
+  color: #888;
+  font-style: italic;
 }
