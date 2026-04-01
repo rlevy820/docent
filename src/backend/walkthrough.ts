@@ -1,7 +1,9 @@
 import type { ReaderResult } from "./reader/types.js";
 import { findSkeleton } from "./skeleton.js";
 import { generateSection } from "./section.js";
+import { extractFeatures } from "./features.js";
 import type { Section } from "./section.js";
+import type { FeatureList } from "./features.js";
 
 // --- Types ---
 
@@ -10,8 +12,10 @@ export interface Walkthrough {
   name: string;
   /** One-line plain-language summary of what the project does */
   what: string;
-  /** The written sections, in order */
+  /** The written sections, in order — the first draft */
   sections: Section[];
+  /** The extracted feature list — two intro sentences + features with detail */
+  featureList: FeatureList;
 }
 
 // --- Builder ---
@@ -57,11 +61,22 @@ export async function buildWalkthrough(reader: ReaderResult): Promise<Walkthroug
     }
   }
 
-  console.error(`[docent] done — ${sections.length} sections`);
+  console.error(`[docent] first draft done — ${sections.length} sections`);
+  console.error("[docent] extracting features...");
+
+  const featureList = await extractFeatures(reader, {
+    name: reader.name,
+    what: skeleton.what,
+    sections,
+    featureList: { userSentence: "", codeSentence: "", features: [] },
+  });
+
+  console.error(`[docent] done — ${featureList.features.length} features`);
 
   return {
     name: reader.name,
     what: skeleton.what,
     sections,
+    featureList,
   };
 }
