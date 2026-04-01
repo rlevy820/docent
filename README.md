@@ -8,10 +8,6 @@ Docent operates in a two pass recursive structure. First, it reads the codebase 
 
 Then, it writes a walkthrough section by section.
 
-![docent screenshot](demo/demo.png)
-
-https://github.com/user-attachments/assets/e8c66d55-23ed-4ed4-a308-af967b1f281f
-
 ## Running it
 
 You need [Node.js](https://nodejs.org) (v18 or later) and an [Anthropic API key](https://console.anthropic.com/).
@@ -41,3 +37,9 @@ This starts a local server (default port 3000). Open `http://localhost:3000` in 
 ## Status
 
 Under active development.
+
+## Demo
+
+![docent screenshot](demo/demo.png)
+
+https://github.com/user-attachments/assets/e8c66d55-23ed-4ed4-a308-af967b1f281f
