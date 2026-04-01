@@ -1,6 +1,6 @@
 {
   "name": "docent",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "A CLI that reads a repo and produces a browser-based walk-through of it",
   "bin": {
