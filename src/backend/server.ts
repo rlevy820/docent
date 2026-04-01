@@ -2,8 +2,7 @@ import { createServer } from "http";
 import { readFile } from "fs/promises";
 import { join, extname } from "path";
 import type { ReaderResult } from "./reader/types.js";
-import type { Space } from "./space.js";
-import { generateSpace } from "./space.js";
+import { buildWalkthrough } from "./walkthrough.js";
 
 const FRONTEND_DIR = join(import.meta.dirname, "../frontend");
 
@@ -14,50 +13,20 @@ const MIME_TYPES: Record<string, string> = {
 };
 
 export async function serve(reader: ReaderResult, port: number = 3000): Promise<void> {
-  // The path of spaces the reader has walked through
-  const spaces: Space[] = [];
-
-  // Generate the root space
-  const root = await generateSpace(reader, []);
-  spaces.push(root);
-
   const server = createServer(async (req, res) => {
     const url = new URL(req.url || "/", `http://localhost:${port}`);
 
     // --- API routes ---
 
-    if (url.pathname === "/api/root") {
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(root));
-      return;
-    }
-
-    if (url.pathname === "/api/door") {
-      const depth = parseInt(url.searchParams.get("depth") || "0");
-      const doorIndex = parseInt(url.searchParams.get("door") || "0");
-
-      // Trim the path to the depth of the clicked door + 1
-      const path = spaces.slice(0, depth + 1);
-
-      const parentSpace = path[depth];
-      if (!parentSpace || !parentSpace.doors[doorIndex]) {
-        res.writeHead(400, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Invalid door" }));
-        return;
-      }
-
+    if (url.pathname === "/api/walkthrough") {
       try {
-        const newSpace = await generateSpace(reader, path);
-
-        // Trim spaces array to current path and add the new space
-        spaces.length = depth + 1;
-        spaces.push(newSpace);
-
+        const walkthrough = await buildWalkthrough(reader);
         res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(newSpace));
+        res.end(JSON.stringify(walkthrough));
       } catch (err) {
+        console.error("[docent] failed to build walkthrough:", err);
         res.writeHead(500, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Failed to generate space" }));
+        res.end(JSON.stringify({ error: "Failed to build walkthrough" }));
       }
       return;
     }
