@@ -2,7 +2,7 @@
 
 A tool that reads any code repository and produces a browser-based walk-through of it, written for someone who has never seen the code and doesn't know what it does.
 
-You point it at a project. A browser opens. What you read should feel like someone knowledgeable walked you through the building — not handed you a blueprint, not pointed at a directory, but stood with you outside, showed you what it is, and then walked you through the doors that matter to you.
+You point it at a project. A browser opens. What you read should feel like someone knowledgeable walked you through the building — not handed you a blueprint, not pointed at a directory, but stood with you outside, showed you what it is, and then walked you through every room in the right order.
 
 The reference for what this output should feel like is in `resources/Natural-Language-Processing.pdf`. Read the first two pages before touching any code.
 
@@ -18,33 +18,47 @@ The solution is not better documentation. The solution is a different kind of ex
 
 ## The Building
 
-Everyone understands buildings. You can look at one from across the street and know roughly what it is — a house, a warehouse, a hospital. You can walk around it and see the sides, the doors, the loading dock. You can pick a door based on who you are — visitor, employee, maintenance — and each door leads you through the same building differently.
+Everyone understands buildings. You can look at one from across the street and know roughly what it is — a house, a warehouse, a hospital. You can walk around it and see the sides. You can walk inside and someone who knows the building can take you through it — showing you the main hall first, then the wings that branch off it, in whatever order makes the building make sense.
 
-Code projects work the same way. They have an exterior (what it is and why it exists), sides you can see from outside (the commands, the inputs, the outputs), doors for different people (the person using it, the person building on it, the person maintaining it), and rooms inside (the parts and how they connect).
+Code projects work the same way. They have an exterior (what it is and why it exists), surfaces you can see from outside (the commands, the inputs, the outputs), a trunk (the central concept everything else hangs off of), and branches (the parts that connect to the trunk and to each other).
 
-Docent's job is to walk someone through the building. Not hand them a floor plan. Walk them through it.
+Docent's job is to walk someone through the building. Not hand them a floor plan. Not give them a menu of rooms to choose from. Walk them through it, in order, with a point of view about what matters and why.
+
+---
+
+## The Point of View
+
+Docent is not interactive. The reader does not choose where to go next. Docent decides the order — the same way a knowledgeable guide decides which room to show you first, because they know which room makes all the other rooms make sense.
+
+This is the key design principle: **docent has a point of view.** It reads the codebase, finds the trunk — the single concept everything else hangs off of — and builds the walk-through outward from there. The reader just follows.
+
+The NLP reference doc works this way. It doesn't ask the reader "what do you want to learn about next?" It just goes — because the author knows the ordering. You can't understand TF-IDF without first understanding bag-of-words, and you can't understand cosine similarity without first understanding vectors. The author knows that. The reader just follows.
+
+Docent must do the same for any codebase. The hard part is not the writing. The hard part is finding the right order.
 
 ---
 
 ## The Output
 
-The output is a single HTML page that opens in the browser. It reads like a walk-through, not a reference doc. No sidebars, no navigation trees, no API tables.
+The output is a single HTML page that opens in the browser. It reads like a walk-through, not a reference doc. No sidebars, no navigation trees, no API tables, no clickable doors.
 
-It follows a zoom sequence — the same way you'd approach a building you've never seen:
+The reader scrolls. The walk-through takes them from the outside of the building to the inside, from the trunk to the branches, zooming in and out as needed, until the architecture feels inevitable.
+
+The zoom sequence:
 
 **1. The Exterior**
-What is this building. Why does it exist. What kind of building is it — described in terms the reader already knows, not technical labels. A project that you type a command into and it does something for you is different from a project that other projects use as a building block, which is different from a project that runs constantly and waits for requests. The reader should understand which kind this is without needing a vocabulary lesson.
+What is this building. Why does it exist. What kind of building is it — described in terms the reader already knows, not technical labels.
 
-**2. The Sides and Doors**
-What's visible from outside. What ways in exist. Each door is described by what you'd be doing when you'd use it — "if you want to use this tool, you go here; if you want to understand how it's built, you go here; if you want to change how it works, you go here." Not every project has every door. Some buildings only have one entrance. The reader should see what doors exist and know which one is theirs.
+**2. What's Visible from Outside**
+The surfaces someone can see before entering. What you'd do with this thing, what it accepts, what it gives back. Described in terms of what a person would see and do.
 
-**3. The Visitor's Entrance**
-The default path. What happens when you walk in as someone who just wants to use this thing. What you see first. What it does for you. This is the equivalent of the old "Part 1" — the front door walk-through — but now it exists inside the larger building, not as a standalone piece.
+**3. The Trunk**
+The central concept — the one thing that everything else in the codebase exists to support. Explained in plain language so the reader holds it before anything else is introduced.
 
-**4. The Map**
-The rooms and why they exist. Not every room — the ones that matter for understanding the building. Each room arrives as the answer to a question the previous room raised. The reader should finish and feel like the architecture is obvious — "of course it works that way" — because each piece was the inevitable solution to a problem they already understood.
+**4. The Branches**
+The parts that connect to the trunk, introduced one at a time, in the order that makes each one feel inevitable. Each branch arrives as the answer to a question the previous section raised. The walk-through zooms in and out as needed — sometimes going deeper into a branch, sometimes pulling back to show how two branches connect.
 
-The reader can put on whichever hat fits. Some will only need the visitor's entrance. Some will want to understand the rooms. The structure accommodates both without forcing either.
+The reader should finish and feel like the architecture is obvious — "of course it works that way" — because each piece was the inevitable solution to a problem they already understood.
 
 ---
 
@@ -54,7 +68,7 @@ The reader does not know what a CLI, an API, a library, a framework, a module, a
 
 The NLP doc does this with "vector": it doesn't say "a vector is like a list." It says "we assign it to a list of numbers, called a vector" and immediately shows why that matters. The term arrives after the reader already understands the concept.
 
-Docent must do the same for every piece of technical vocabulary. "A window on your computer you type commands into" comes before "command-line tool." "A collection of pieces of code other people use to build build new code on top of" comes before "library."
+Docent must do the same for every piece of technical vocabulary. "A window on your computer you type commands into" comes before "command-line tool." "A collection of pieces of code other people use to build new code on top of" comes before "library."
 
 The description is the definition. The term is just a shorter name for something the reader already holds.
 
@@ -62,30 +76,33 @@ The description is the definition. The term is just a shorter name for something
 
 ## The Generation Task
 
-The system reads a repo and produces the walk-through.
+The system reads a repo and produces the walk-through in two steps.
 
-To do this, the inference layer must answer these questions:
+### Step 1: The Skeleton (trunk-finder)
 
-**1. What is this building and why was it built?**
-What problem in the world may have caused someone to build this. One sentence, plain English, no jargon. A person who has never written code should be able to read it and know whether this project is relevant to their life.
+One call. Global view. Reads the entire packed codebase and produces a structural map:
 
-**2. What kind of building is it?**
-Not a label (CLI, library, service) but a plain-language description of how this kind of thing works. What does the person do with it? Do they type something and get a result? Do they plug it into something else they're building? Does it run on its own and wait? The description should make the kind obvious before any term is introduced.
+- **The trunk**: The single most foundational concept in the codebase — the one thing everything else hangs off of. Not a file name. A concept, described in plain language.
+- **The branches**: The 2-4 major parts that connect to the trunk, ordered by dependency — which branches require understanding other branches first.
+- **For each branch**: A one-line description of what problem it solves and why it exists.
 
-**3. What are the sides — what's visible from outside?**
-The surfaces someone can see before entering. For a command-based tool: the commands and what they accept. For a collection of building blocks: what pieces are available. For a running service: what it responds to. Described in terms of what a person would yeahsee and do, not technical interface descriptions.
+The skeleton is docent's point of view. It's the guide's opinion about the shape of the building and the order the wings make sense in. It does not contain prose — it's a structural plan that the section writer will follow.
 
-**4. What doors exist and who are they for?**
-Every way into the project, described by the relationship the person has to it. "If you want to use this, you start here." "If you want to understand how it's built, you start here." "If you want to change it, you start here." Not every project has all three. Some have one door.
+The skeleton does not need to be exhaustive. It covers the trunk and the first level of branches. Deeper structure is discovered during writing.
 
-**5. What happens when you walk through the visitor's door?**
-The primary use case, step by step. What you do, what happens, what you get back. Written so someone who has never used a tool like this can follow it.
+### Step 2: The Walk-Through (recursive section writer)
 
-**6. What are the rooms and why does each one exist?**
-The major parts of the project and how they relate. Each room should be described by the problem it solves, not by its technical name. The order matters: each room should answer a question that the previous room raised. The sequence should make the architecture feel inevitable.
+Multiple calls. Local view. Given the skeleton and everything written so far, writes the next section of the walk-through and decides what comes after.
 
-**7. For every concept: what's the plain description and what's the technical term?**
-Every technical term surfaced in answers 1-6 must have a paired plain-language description. The writer uses the description first, introduces the term after.
+Each call produces:
+- **A section**: A chunk of the walk-through (a few paragraphs). Plain language. Follows the term rule. Builds on what the reader already knows.
+- **A next-step decision**: Go deeper into the current branch, move to the next branch on the skeleton, or stop.
+
+The next-step decision is the recursive part. After writing a section about the trunk, the writer might decide the reader needs to go one level deeper before moving to the first branch. Or it might decide the reader is ready. This judgment can only be made after the writing — the act of explaining something reveals what the reader needs next.
+
+The recursion carries a goal: **builder-readiness**. At each step, pick the next section that most increases the reader's ability to contribute to the project. Not just understand — contribute.
+
+The recursion terminates when the major branches have been covered to the depth needed for a developer to start working.
 
 ---
 
@@ -116,11 +133,14 @@ This is the writer's real job: not formatting structured data into paragraphs, b
 ## Development Sequence
 
 1. ~~Build the repo reader: given a directory, collect manifests, README, file tree, and packed source.~~ Done.
-2. Build the inference layer: given the reader output, answer the seven questions above and produce structured output (not prose yet).
-3. Build the writer: given the structured output, produce the walk-through as an HTML page.
-4. Build the server: serve the HTML and open the browser.
-5. Wire everything together as the `docent` command.
-6. Test on real repos of increasing complexity. Evaluate whether the output passes the writing standard and the "of course" test.
+2. ~~Build the interactive space generation (v1 inference): Space/Door model with reader-chosen navigation.~~ Done, being replaced.
+3. Build the skeleton-finder: given the reader output, find the trunk and ordered branches.
+4. Build the section writer: given the skeleton + prior sections, write the next section and decide what comes next.
+5. Build the walk-through generator: wire skeleton-finder and section writer into a loop that produces the full walk-through.
+6. Update the server: serve the complete walk-through as a single page (replace the door-clicking API).
+7. Update the frontend: render the linear walk-through (replace door-clicking UI).
+8. Wire everything together as the `docent` command.
+9. Test on real repos of increasing complexity. Evaluate whether the output passes the writing standard and the "of course" test.
 
 ---
 
@@ -136,20 +156,22 @@ docent/
       reader.ts                       # Public API: readRepo(dir) -> ReadResult
       reader/
         types.ts                      # ReaderResult, ManifestFile interfaces
-        manifests.ts                  # Manifest detection + project name extraction
         context.ts                    # README finder, file tree builder
+        manifests.ts                  # Manifest detection + project name extraction
         pack.ts                       # Repomix integration for packing source
-      space.ts                        # Space/Door types, prompt building, generateSpace()
+      space.ts                        # (v1, being replaced) Space/Door generation
+      skeleton.ts                     # (next) Skeleton-finder: trunk + ordered branches
+      section.ts                      # (next) Section writer: recursive walk-through generation
       client.ts                       # Anthropic API client wrapper (callClaude)
-      server.ts                       # HTTP server: JSON API (/api/root, /api/door) + static file serving
+      server.ts                       # HTTP server (will be updated for linear walk-through)
     frontend/
       index.html                      # Page shell — loads style.css and app.js
-      style.css                       # All styling (Century Schoolbook, doors, loading states)
-      app.js                          # Client-side rendering: fetches spaces from API, renders doors
+      style.css                       # All styling
+      app.js                          # Client-side rendering (will be updated for linear walk-through)
     cli.ts                            # (not built yet) Entry point: `docent`
   test/
     reader/                           # Unit tests for reader module
-    inference/                        # Unit tests for space/prompt module
+    inference/                        # Unit tests for space/prompt module (will be updated)
     writer/                           # Tests for frontend static files
     fixtures/                         # Minimal fake repos for testing
     manual-check.ts                   # Run reader on any repo with progress logs
@@ -163,12 +185,13 @@ docent/
 
 ### Done
 - **Reader module** (`src/backend/reader.ts`): Takes any directory, returns manifests, README, file tree, and Repomix-packed source. Language-agnostic. Filters binary files from tree. 23 tests.
-- **Space generation** (`src/backend/space.ts`): Builds prompts from reader output + walk-through path, calls Claude, returns a Space (content + doors). Recursive — each door click generates a new space.
-- **Backend server** (`src/backend/server.ts`): HTTP server with JSON API (`/api/root`, `/api/door`) and static file serving for the frontend.
-- **Frontend** (`src/frontend/`): Static HTML/CSS/JS app. Fetches spaces from the API, renders them, handles door clicks client-side.
+- **v1 Space generation** (`src/backend/space.ts`): Interactive Space/Door model. Works but is being replaced by the skeleton + section writer approach.
+- **v1 Backend server** (`src/backend/server.ts`): HTTP server with door-clicking API. Will be updated.
+- **v1 Frontend** (`src/frontend/`): Door-clicking UI. Will be updated.
 
-### Not Built Yet
-- **CLI**: Wire everything together as `docent` command.
+### Next
+- **Skeleton-finder** (`src/backend/skeleton.ts`): Read the whole codebase, find the trunk and ordered branches.
+- **Section writer** (`src/backend/section.ts`): Given skeleton + prior sections, write the next chunk and decide what comes next.
 
 ### Dependencies
 - `repomix` — repo packing (file tree, .gitignore, source collection)
